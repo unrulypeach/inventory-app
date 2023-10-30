@@ -3,15 +3,11 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-require('dotenv').config();
-
-
-const { MongoClient } = require('mongodb');
-const uri = process.env.MONGODB_URI;
-const client = new MongoClient(uri);
+const {mongoClient, connectToDatabase} = require('./mongoUtil');
+connectToDatabase().catch(e => console.log(e));
 
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+const catalogRouter = require('./routes/catalog');
 
 var app = express();
 
@@ -26,7 +22,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
-app.use('/users', usersRouter);
+app.use('/catalog', catalogRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -44,18 +40,5 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-async function run() {
-  try {
-    const database = client.db('inventory_info');
-    const movies = database.collection('item');
-    // Query for a movie that has the title 'Back to the Future'
-    const movie = await movies.findOne();
-    console.log(movie);
-  } finally {
-    // Ensures that the client will close when you finish/error
-    await client.close();
-  }
-}
-run().catch(console.dir);
 
 module.exports = app;
