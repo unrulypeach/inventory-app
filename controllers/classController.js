@@ -37,14 +37,46 @@ exports.class_detail = asyncHandler(async (req, res, next) => {
 });
 
 // Display class create form on GET.
-exports.class_create_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Class create GET");
-});
+exports.class_create_get = (req, res, next) => {
+  res.render('class_form', { title: 'Create new class' });
+};
 
 // Handle class create on POST.
-exports.class_create_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Class create POST");
-});
+exports.class_create_post = [
+  body('class_name', 'class name must contain at least 3 letters')
+    .trim()
+    .isLength({ min: 3})
+    .escape(),
+
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const className = req.body.class_name.toLowerCase();
+
+    const newClassDoc = {
+      name: className,
+    };
+
+    if(!errors.isEmpty()) {
+      res.render('class_form', {
+        title: 'Create new class', 
+        type: newClassDoc,
+        errors: errors.array(),
+      });
+      return;
+    } else {
+      //check if already exists
+      const classColl = mongoClient.db('inventory_info').collection('class');
+      const classExists = await classColl.findOne({ name: className });
+      
+      if (classExists) {
+        res.redirect(`catalog/class/${className}`);
+      } else {
+        await classColl.insertOne(newClassDoc);
+        res.redirect(`/catalog/types/${className}`);
+      }
+    }
+})];
 
 /* DO NOT CREATE UNTIL AUTH IMPLEMENTED
 // Display class delete form on GET.
