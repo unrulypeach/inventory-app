@@ -40,14 +40,45 @@ exports.type_detail = asyncHandler(async (req, res, next) => {
 }); 
 
 // Display type create form on GET.
-exports.type_create_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Type create GET");
-});
+exports.type_create_get = (req, res, next) => {
+  res.render('type_form', { title: 'Create new type' });
+};
 
 // Handle type create on POST.
-exports.type_create_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Type create POST");
-});
+exports.type_create_post =[ 
+  body('type_name', 'Type name must contain at least 3 characters')
+    .trim()
+    .isLength({ min: 3 })
+    .escape(),
+  
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const typeName = req.body.type_name.toLowerCase();
+
+    const newTypeDoc = {
+      name: typeName,
+    }
+
+    if(!errors.isEmpty()) {
+      res.render('type_form', {
+        title: 'Create new type',
+        type: newTypeDoc,
+        errors: errors.array(),
+      });
+      return;
+    } else {
+      // check if type already exists
+      const typeColl = mongoClient.db('inventory_info').collection('type');
+      const typeExists = await typeColl.findOne({ name: typeName })
+      if (typeExists) {
+        res.redirect(`/catalog/types/${typeName}`)
+      } else {
+        await typeColl.insertOne(newTypeDoc);
+        res.redirect(`/catalog/types/${typeName}`)
+      }
+    }
+})];
 
 // Display type delete form on GET.
 exports.type_delete_get = asyncHandler(async (req, res, next) => {
