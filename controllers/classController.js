@@ -46,6 +46,7 @@ exports.class_create_post = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Class create POST");
 });
 
+/* DO NOT CREATE UNTIL AUTH IMPLEMENTED
 // Display class delete form on GET.
 exports.class_delete_get = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Class delete GET");
@@ -54,7 +55,7 @@ exports.class_delete_get = asyncHandler(async (req, res, next) => {
 // Handle class delete on POST.
 exports.class_delete_post = asyncHandler(async (req, res, next) => {
   res.send("NOT IMPLEMENTED: Class delete POST");
-});
+}); */
 
 // Display class update form on GET.
 exports.class_update_get = asyncHandler(async (req, res, next) => {

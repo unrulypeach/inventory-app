@@ -69,11 +69,12 @@ router.get('/class/create', class_controller.class_create_get);
 // POST request for create class
 router.post('/class/create', class_controller.class_create_post);
 
+/* DO NOT CREATE UNTIL AUTH IMPLEMENTED
 // GET request to delete class
 router.get('/class/:id/delete', class_controller.class_delete_get);
 
 // POST request to delete class
-router.post('/class/:id/delete', class_controller.class_delete_post);
+router.post('/class/:id/delete', class_controller.class_delete_post); */
 
 // GET request to update class
 router.get('/class/:id/update', class_controller.class_update_get);
