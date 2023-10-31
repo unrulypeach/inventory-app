@@ -4,10 +4,9 @@ const { mongoClient } = require('../mongoUtil');
 
 exports.rarities_list = asyncHandler(async(req, res, next) => {
   try{
-    const cursor = mongoClient.db('inventory_info');
-    const rarities = cursor.collection('rarity');
+    const database = mongoClient.db('inventory_info');
+    const rarities = database.collection('rarity');
     const rarities_list = await rarities.find({}).toArray();
-    console.log(rarities_list)
 
     res.render('rarities_list', {
       title: 'Rarity List',

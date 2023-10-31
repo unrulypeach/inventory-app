@@ -1,9 +1,24 @@
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
+const { mongoClient } = require('../mongoUtil');
 
 // Display list of all classs.
 exports.class_list = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Class list");
+  try {
+
+    const database = mongoClient.db('inventory_info');
+    const class_db = database.collection('class');
+    const class_list = await class_db.find({}).toArray();
+    console.log(class_list)
+    
+    res.render('class_list', {
+      title: 'Class List',
+      class_list,
+    });
+    return;
+  } catch(err) {
+    console.log(err)
+  }
 });
 
 // Display detail page for a specific class.

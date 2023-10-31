@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
+const { mongoClient } = require('../mongoUtil');
+const { ObjectId } = require('mongodb');
 
 exports.index = asyncHandler(async (req, res, next) => {
   // res.send("NOT IMPLEMENTED: Site Home Page");
@@ -8,12 +10,37 @@ exports.index = asyncHandler(async (req, res, next) => {
 
 // Display list of all items.
 exports.item_list = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Item list");
+  try {
+    const database = mongoClient.db('inventory_info');
+    const itemCollection = database.collection('item');
+    const item_list = await itemCollection.find({}, { projection: { name: 1 } }).toArray();
+    
+    res.render('item_list', {
+      title: 'Item List',
+      item_list
+    });
+    return;
+  } catch(err) {
+    console.log(err)
+  }
 });
 
 // Display detail page for a specific item.
 exports.item_detail = asyncHandler(async (req, res, next) => {
-  res.send(`NOT IMPLEMENTED: Item detail: ${req.params.id}`);
+  try {
+    const id = new ObjectId(req.params.id);
+    const database = mongoClient.db('inventory_info');
+    const itemCollection = database.collection('item');
+    const item = await itemCollection.findOne({ _id: id });
+    console.log(item);
+    res.render('item_detail', {
+      title: 'Item Detail',
+      item,
+    });
+    return;
+  } catch(err) {
+    console.log(err)
+  }
 });
 
 // Display item create form on GET.

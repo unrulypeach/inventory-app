@@ -1,0 +1,8 @@
+extends layout 
+
+block content
+  h1= title 
+
+  each item in type_list 
+    li 
+      a(href=`type/${item._id}`)= item.name

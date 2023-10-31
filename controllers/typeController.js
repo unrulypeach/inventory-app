@@ -1,9 +1,23 @@
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
+const { mongoClient } = require('../mongoUtil');
 
 // Display list of all types.
 exports.type_list = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Type list");
+  try{
+
+    const database = mongoClient.db('inventory_info');
+    const typeDB = database.collection('type');
+    const type_list = await typeDB.find({}).toArray();
+
+    res.render('type_list', {
+      title: 'Type List',
+      type_list,
+    });
+    return;
+  } catch(err) {
+    console.log(err)
+  }
 });
 
 // Display detail page for a specific type.
