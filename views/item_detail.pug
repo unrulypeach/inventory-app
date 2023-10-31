@@ -4,5 +4,9 @@ block content
   h1= title 
 
   h2= item.name 
-  p= item.effect 
-  p= item.type 
+  p Effect: #{item.effect} 
+  p Rarity: #{item.rarity}
+  p Type:  #{item.type} 
+  p Cost: #{item.cost}
+  p Class: #{undefined===item.class ? 'All' : item.class}
+  

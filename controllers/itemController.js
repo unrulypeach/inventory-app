@@ -1,10 +1,9 @@
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
-const { mongoClient } = require('../mongoUtil');
+const { mongoClient } = require('../utils/mongoUtil');
 const { ObjectId } = require('mongodb');
 
 exports.index = asyncHandler(async (req, res, next) => {
-  // res.send("NOT IMPLEMENTED: Site Home Page");
   res.render('index', {title: 'Backpack Battles Inventory'});
 });
 
@@ -32,7 +31,7 @@ exports.item_detail = asyncHandler(async (req, res, next) => {
     const database = mongoClient.db('inventory_info');
     const itemCollection = database.collection('item');
     const item = await itemCollection.findOne({ _id: id });
-    console.log(item);
+
     res.render('item_detail', {
       title: 'Item Detail',
       item,

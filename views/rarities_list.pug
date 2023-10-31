@@ -3,7 +3,8 @@ extends layout
 block content
   h1= title 
 
-  each thing in rarity_list
-    li
-      a(href=thing.name)= thing.name
+  ul
+    each thing in rarity_list
+      li
+        a(href=`rarities/${thing.toLowerCase()}`)= thing
 
