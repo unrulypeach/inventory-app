@@ -24,7 +24,6 @@ exports.rarities_detail = asyncHandler(async(req, res, next) => {
     const rarityName = req.params.id;
     const itemColl = mongoClient.db('inventory_info').collection('item');
     const items_by_rarity = await itemColl.find({ rarity: rarityName }, { projection: { name: 1 } }).toArray();
-    console.log(items_by_rarity);
 
     res.render('rarities_detail', {
       title: `${capitalizeFirstLetter(rarityName)} Items`,

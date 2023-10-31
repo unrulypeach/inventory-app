@@ -28,7 +28,6 @@ exports.type_detail = asyncHandler(async (req, res, next) => {
     const typeName = req.params.id;
     const itemColl = mongoClient.db('inventory_info').collection('item');
     const items_by_type = await itemColl.find({ type: typeName }, { projection: { name: 1 } }).toArray();
-    console.log(items_by_type)
     res.render('type_detail', {
       title: `${capitalizeFirstLetter(typeName)} Items`,
       type_list: items_by_type,
@@ -70,12 +69,12 @@ exports.type_create_post =[
     } else {
       // check if type already exists
       const typeColl = mongoClient.db('inventory_info').collection('type');
-      const typeExists = await typeColl.findOne({ name: typeName })
+      const typeExists = await typeColl.findOne({ name: typeName });
       if (typeExists) {
-        res.redirect(`/catalog/types/${typeName}`)
+        res.redirect(`/catalog/types/${typeName}`);
       } else {
         await typeColl.insertOne(newTypeDoc);
-        res.redirect(`/catalog/types/${typeName}`)
+        res.redirect(`/catalog/types/${typeName}`);
       }
     }
 })];
