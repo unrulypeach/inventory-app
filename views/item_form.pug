@@ -1,0 +1,46 @@
+extends layout 
+
+block content 
+  h1= title 
+
+  form(method='POST' action='')
+    .form-group 
+      label(for='item_name') Name:
+      input#item_name.form-control(type='text' placeholder='Item Name' name='item_name' value=(undefined===item ? '' : item.name))
+    .form-group
+      label(for='item_effect') Effect:
+      input#item_effect.form-control(type='text' placeholder='Item Effect' name='item_effect' value=(undefined===item ? '' : item.effect))
+    .form-group 
+      label(for='item_rarity') Rarity:
+      select#item_rarity.form-control(name='item_rarity' required)
+        option(value='' selected disabled) Select Rarity
+        for rarity in allRarity 
+          option(value=rarity) #{rarity}
+    .form-group 
+      label(for='item_type') Type:
+      select#item_type.form-control.selectpicker.show-tick(name='item_type' multiple required)
+        option(value='' selected disabled) Hold ctrl to select multiple types
+        for aType in allType 
+          option(value=aType) #{aType}
+    .form-group 
+      label(for='item_cost') Cost:
+      input#item_cost.form-control(type='number' name='item_cost' min=0)
+    .form-group 
+      label(for='item_class') Class: 
+      select#item_class.form-control(name='item_class' aria-label="Default select example")
+        option(value='' selected disabled) Select Class if necessary
+        for aClass in allClass 
+          option(value=aClass) #{aClass}
+    .form-group 
+      label(for='item_requires') Required Items: 
+      input#item_requires.form-control(type='' placeholder='Optional' name= 'item_requires')
+    .form-group 
+      label(for='item_used_in_recipe') Used in Recipe: 
+      input#item_used_in_recipe.form-control(type='' placeholder='Optional' name='item_used_in_recipe')
+    button.btn.btn-primary(type='submit') Submit 
+
+  if errors 
+    div.mt-2
+      ul
+        for error in errors 
+          li!= error.msg

@@ -2,6 +2,7 @@ const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 const { mongoClient } = require('../utils/mongoUtil');
 const { ObjectId } = require('mongodb');
+const { capitalizeFirstLetter } = require('../utils/utils');
 
 exports.index = asyncHandler(async (req, res, next) => {
   res.render('index', {title: 'Backpack Battles Inventory'});
@@ -28,8 +29,7 @@ exports.item_list = asyncHandler(async (req, res, next) => {
 exports.item_detail = asyncHandler(async (req, res, next) => {
   try {
     const id = new ObjectId(req.params.id);
-    const database = mongoClient.db('inventory_info');
-    const itemCollection = database.collection('item');
+    const itemCollection = mongoClient.db('inventory_info').collection('item');
     const item = await itemCollection.findOne({ _id: id });
 
     res.render('item_detail', {
@@ -44,7 +44,26 @@ exports.item_detail = asyncHandler(async (req, res, next) => {
 
 // Display item create form on GET.
 exports.item_create_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Item create GET");
+  const rarityColl = mongoClient.db('inventory_info').collection('rarity');
+  const typeColl = mongoClient.db('inventory_info').collection('type');
+  const classColl = mongoClient.db('inventory_info').collection('class');
+  
+  const [allRarity, allType, allClass] = await Promise.all([
+    rarityColl.find({}, { populate: { _id: 0 } }).toArray(),
+    typeColl.find({}, { populate: { _id: 0 } }).toArray(),
+    classColl.find({}, { populate: { _id: 0 } }).toArray(),
+  ]);
+
+  const formattedRarity = allRarity.map(item => capitalizeFirstLetter(item.name));
+  const formattedType = allType.map(item => capitalizeFirstLetter(item.name));
+  const formattedClass = allClass.map(item => capitalizeFirstLetter(item.name));
+
+  res.render('item_form', { 
+    title: 'Create new item',
+    allRarity: formattedRarity,
+    allType: formattedType,
+    allClass: formattedClass,
+  });
 });
 
 // Handle item create on POST.
