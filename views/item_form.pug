@@ -5,38 +5,42 @@ block content
 
   form(method='POST' action='')
     .form-group 
-      label(for='item_name') Name:
-      input#item_name.form-control(type='text' placeholder='Item Name' name='item_name' value=(undefined===item ? '' : item.name))
+      label(for='name') Name:
+      input#name.form-control.border(type='text' placeholder='Item Name' name='name' value=(undefined===item ? '' : item.name) required)
     .form-group
-      label(for='item_effect') Effect:
-      input#item_effect.form-control(type='text' placeholder='Item Effect' name='item_effect' value=(undefined===item ? '' : item.effect))
+      label(for='effect') Effect:
+      input#effect.form-control.border(type='text' placeholder='Item Effect' name='effect' value=(undefined===item ? '' : item.effect) required)
     .form-group 
-      label(for='item_rarity') Rarity:
-      select#item_rarity.form-control(name='item_rarity' required)
+      label(for='rarity') Rarity:
+      select#rarity.form-control.border(name='rarity' required)
         option(value='' selected disabled) Select Rarity
         for rarity in allRarity 
           option(value=rarity) #{rarity}
     .form-group 
-      label(for='item_type') Type:
-      select#item_type.form-control.selectpicker.show-tick(name='item_type' multiple required)
-        option(value='' selected disabled) Hold ctrl to select multiple types
+      label(for='type') Type:
+      select#type.form-control.selectpicker.border.border-secondary-subtle(name='type' data-live-search='true' data-actions-box="true" placeholder='Select Type(s)' multiple required)
+        //- option(value='' selected disabled) Hold ctrl to select multiple types
         for aType in allType 
           option(value=aType) #{aType}
     .form-group 
-      label(for='item_cost') Cost:
-      input#item_cost.form-control(type='number' name='item_cost' min=0)
+      label(for='cost') Cost:
+      input#cost.form-control.border(type='number' name='cost' min=0 required)
     .form-group 
-      label(for='item_class') Class: 
-      select#item_class.form-control(name='item_class' aria-label="Default select example")
+      label(for='of_class') Class: 
+      select#of_class.form-control.border(name='of_class' aria-label="Default select example")
         option(value='' selected disabled) Select Class if necessary
         for aClass in allClass 
           option(value=aClass) #{aClass}
     .form-group 
-      label(for='item_requires') Required Items: 
-      input#item_requires.form-control(type='' placeholder='Optional' name= 'item_requires')
+      label(for='requires') Required Items: 
+      select#requires.form-control.selectpicker.border(name= 'requires' data-live-search='true' data-actions-box="true" placeholder='Optional' multiple)
+        for item in allItem 
+          option(value=item.name) #{item.name}
     .form-group 
-      label(for='item_used_in_recipe') Used in Recipe: 
-      input#item_used_in_recipe.form-control(type='' placeholder='Optional' name='item_used_in_recipe')
+      label(for='used_in_recipe') Used in Recipe: 
+      select#used_in_recipe.form-control.selectpicker.border(name='used_in_recipe' data-live-search='true'  data-actions-box="true" placeholder='Optional' multiple)
+        for item in allItem 
+          option(value=item.name) #{item.name}
     button.btn.btn-primary(type='submit') Submit 
 
   if errors 
