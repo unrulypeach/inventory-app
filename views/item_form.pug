@@ -15,32 +15,31 @@ block content
       select#rarity.form-control.border(name='rarity' required)
         option(value='' selected disabled) Select Rarity
         for rarity in allRarity 
-          option(value=rarity) #{rarity}
+            option(value=rarity.name selected=(rarity.checked ? true : false)) #{rarity.name.charAt(0).toUpperCase() + rarity.name.slice(1)}
     .form-group 
       label(for='type') Type:
       select#type.form-control.selectpicker.border.border-secondary-subtle(name='type' data-live-search='true' data-actions-box="true" placeholder='Select Type(s)' multiple required)
-        //- option(value='' selected disabled) Hold ctrl to select multiple types
         for aType in allType 
-          option(value=aType) #{aType}
+          option(value=aType.name selected=(aType.checked ? true : false)) #{aType.name.charAt(0).toUpperCase() + aType.name.slice(1)}
     .form-group 
       label(for='cost') Cost:
-      input#cost.form-control.border(type='number' name='cost' min=0 required)
+      input#cost.form-control.border(type='number' name='cost' min=0 value=(undefined===item ? '' : item.cost) required)
     .form-group 
       label(for='of_class') Class: 
       select#of_class.form-control.border(name='of_class' aria-label="Default select example")
         option(value='' selected disabled) Select Class if necessary
         for aClass in allClass 
-          option(value=aClass) #{aClass}
+          option(value=aClass.name selected=(aClass.checked ? true : false)) #{aClass.name.charAt(0).toUpperCase() + aClass.name.slice(1)}
     .form-group 
       label(for='requires') Required Items: 
       select#requires.form-control.selectpicker.border(name= 'requires' data-live-search='true' data-actions-box="true" placeholder='Optional' multiple)
         for item in allItem 
-          option(value=item.name) #{item.name}
+          option(value=item.name selected=(item.prevRequires ? true : false)) #{item.name}
     .form-group 
       label(for='used_in_recipe') Used in Recipe: 
       select#used_in_recipe.form-control.selectpicker.border(name='used_in_recipe' data-live-search='true'  data-actions-box="true" placeholder='Optional' multiple)
         for item in allItem 
-          option(value=item.name) #{item.name}
+          option(value=item.name selected=(item.prevUsed ? true : false)) #{item.name}
     button.btn.btn-primary(type='submit') Submit 
 
   if errors 

@@ -56,14 +56,12 @@ exports.item_create_get = asyncHandler(async (req, res, next) => {
     itemColl.find({}, { populate: { _id: 0, name: 1 } }).toArray(),
   ]);
 
-  const formattedRarity = allRarity.map(item => capitalizeFirstLetter(item.name));
-  const formattedType = allType
-    .map(item => capitalizeFirstLetter(item.name))
+  const sortedType = allType
     .sort((a, b) => {
-      return (a.toUpperCase() < b.toUpperCase()) ? -1 :
-      (a.toUpperCase() > b.toUpperCase()) ? 1 : 0;
+      return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
+      (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
     });
-  const formattedClass = allClass.map(item => capitalizeFirstLetter(item.name));
+
   const sortedItems = allItem.sort((a, b) => {
     return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
     (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
@@ -71,9 +69,9 @@ exports.item_create_get = asyncHandler(async (req, res, next) => {
 
   res.render('item_form', { 
     title: 'Create new item',
-    allRarity: formattedRarity,
-    allType: formattedType,
-    allClass: formattedClass,
+    allRarity,
+    allType: sortedType,
+    allClass,
     allItem: sortedItems,
   });
 });
@@ -105,14 +103,8 @@ exports.item_create_post = [
     .notEmpty()
     .escape(),
   body('type', 'type is required')
-    .custom((value) => {
-      const isString = typeof value === 'string';
-      const isArray = Array.isArray(value)
-      if ( !isString && !isArray) {
-        throw new Error(`invalid type. isString=${isString}, isArray=${isArray}`)
-      };
-      return true;
-    })
+    .toArray()
+    .isArray()
     .escape(),
   body('cost', 'cost is required')
     .trim()
@@ -126,10 +118,14 @@ exports.item_create_post = [
   body('requires', 'requires error')
     .trim()
     .optional()
+    .toArray()
+    .isArray()
     .escape(),
   body('used_in_recipe', 'used_in_recipes error')
     .trim()
     .optional()
+    .toArray()
+    .isArray()
     .escape(),
   asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
@@ -142,14 +138,14 @@ exports.item_create_post = [
       name,
       effect,
       rarity: rarity.toLowerCase(),
-      type: (Array.isArray(type)) ?  type.map(x => x.toLowerCase()) : new Array(type).map(x.toLowerCase),
+      type: type.map(x => x.toLowerCase()),
       cost,
-      ...(of_class) && {of_class: (Array.isArray(of_class)) ?  of_class.map(x => x.toLowerCase()) : new Array(of_class).map(x => x.toLowerCase())},
+      ...(of_class) && {of_class},
       ...(requires) && {requires: (Array.isArray(requires)) ?  requires.map(x => x.toLowerCase()) : new Array(requires).map(x => x.toLowerCase())},
       ...(used_in_recipe) && {used_in_recipe: (Array.isArray(used_in_recipe)) ?  used_in_recipe.map(x => x.toLowerCase()) : new Array(used_in_recipe).map(x => x.toLowerCase())},
     };
+
     if (!errors.isEmpty()) {
-      
       const [allRarity, allType, allClass, allItem] = await Promise.all([
         rarityColl.find({}, { populate: { _id: 0 } }).toArray(),
         typeColl.find({}, { populate: { _id: 0 } }).toArray(),
@@ -157,24 +153,64 @@ exports.item_create_post = [
         itemColl.find({}, { populate: { _id: 0, name: 1 } }).toArray(),
       ]);
     
-      const formattedRarity = allRarity.map(item => capitalizeFirstLetter(item.name));
-      const formattedType = allType
-        .map(item => capitalizeFirstLetter(item.name))
+     
+      for (const rarity of allRarity) {
+        if (newItem.rarity.toLowerCase() === rarity.name.toLowerCase()) {
+          rarity.checked = 'true';
+        }
+      };
+
+      for (const prevType of type) {
+        for (const aType of allType) {
+          if (prevType.toLowerCase() === aType.name.toLowerCase()) {
+            aType.checked = 'true';
+          }
+        }
+      };
+
+      if (of_class) {
+        for (const aClass of allClass) {
+          if (newItem.of_class.toLowerCase() === aClass.name) {
+            aClass.checked = 'true';
+          }
+        };
+      };
+
+      if (requires) {
+        for (const prevReq of requires) {
+          for (const item of allItem) {
+            if (prevReq.toLowerCase() === item.name.toLowerCase()) {
+              item.prevRequires = 'true';
+            }
+          }
+        }
+      };
+
+      if (used_in_recipe) {
+        for (const prevUsed of used_in_recipe) {
+          for (const item of allItem) {
+            if (prevUsed.toLowerCase() === item.name.toLowerCase()) {
+              item.prevUsed = 'true';
+            }
+          }
+        }
+      };
+
+      const sortedType = allType
         .sort((a, b) => {
-          return (a.toUpperCase() < b.toUpperCase()) ? -1 :
-          (a.toUpperCase() > b.toUpperCase()) ? 1 : 0;
+          return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
+          (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
         });
-      const formattedClass = allClass.map(item => capitalizeFirstLetter(item.name));
       const sortedItems = allItem.sort((a, b) => {
         return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
         (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
       });
-    
+
       res.render('item_form', { 
         title: 'Create new item',
-        allRarity: formattedRarity,
-        allType: formattedType,
-        allClass: formattedClass,
+        allRarity,
+        allType: sortedType,
+        allClass,
         allItem: sortedItems,
         item: newItem,
         errors: errors.array(),
@@ -197,7 +233,7 @@ exports.item_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display item update form on GET.
 exports.item_update_get = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Item update GET");
+  
 });
 
 // Handle item update on POST.
