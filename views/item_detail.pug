@@ -5,8 +5,8 @@ block content
 
   h2= item.name 
   p Effect: #{item.effect} 
-  p Rarity: #{item.rarity}
-  p Type:  #{item.type} 
+  p Rarity: #{item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)}
+  p Type:  #{item.type.charAt(0).toUpperCase() + item.rarity.slice(1)} 
   p Cost: #{item.cost}
   p Class: #{undefined===item.class ? 'All' : item.class}
   
