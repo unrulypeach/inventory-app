@@ -27,7 +27,7 @@ block content
     .form-group 
       label(for='of_class') Class: 
       select#of_class.form-control.border(name='of_class' aria-label="Default select example")
-        option(value='' selected disabled) Select Class if necessary
+        option(value='' selected) Select Class if necessary
         for aClass in allClass 
           option(value=aClass.name selected=(aClass.checked ? true : false)) #{aClass.name.charAt(0).toUpperCase() + aClass.name.slice(1)}
     .form-group 

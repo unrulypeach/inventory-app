@@ -1,12 +1,22 @@
 extends layout 
 
 block content 
-  h1= title 
-
-  h2= item.name 
+  h1= item.name 
   p Effect: #{item.effect} 
   p Rarity: #{item.rarity.charAt(0).toUpperCase() + item.rarity.slice(1)}
-  p Type:  #{item.type.charAt(0).toUpperCase() + item.rarity.slice(1)} 
+  p Type: 
+    for thing in item.type
+      span #{thing.charAt(0).toUpperCase() + thing.slice(1)} |  
   p Cost: #{item.cost}
   p Class: #{undefined===item.class ? 'All' : item.class}
-  
+  -if (item.requires !== undefined) {
+    p Requires: 
+      for thing in item.requires
+        a(href=`/catalog/item/${thing}`) #{thing} | 
+  -}
+  //- p #{undefined===item.used_in_recipe ? '' : `Used in Recipe:${item.used_in_recipe}` }
+  -if (item.used_in_recipe !== undefined) {
+    p Used in Recipe: 
+      for thing in item.used_in_recipe
+        a(href=`/catalog/item/${thing}`) #{thing} | 
+  -}

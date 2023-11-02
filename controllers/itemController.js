@@ -14,6 +14,11 @@ exports.item_list = asyncHandler(async (req, res, next) => {
     const database = mongoClient.db('inventory_info');
     const itemCollection = database.collection('item');
     const item_list = await itemCollection.find({}, { projection: { name: 1 } }).toArray();
+
+    item_list.sort((a, b) => {
+      return (a.name.toLowerCase() < b.name.toLowerCase()) ? -1 :
+      (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : 0
+    })
     
     res.render('item_list', {
       title: 'Item List',
@@ -33,7 +38,7 @@ exports.item_detail = asyncHandler(async (req, res, next) => {
     const item = await itemCollection.findOne({ _id: id });
 
     res.render('item_detail', {
-      title: 'Item Detail',
+      title: `${item.name} - Item Detail`,
       item,
     });
     return;
@@ -141,8 +146,8 @@ exports.item_create_post = [
       type: type.map(x => x.toLowerCase()),
       cost,
       ...(of_class) && {of_class},
-      ...(requires) && {requires: (Array.isArray(requires)) ?  requires.map(x => x.toLowerCase()) : new Array(requires).map(x => x.toLowerCase())},
-      ...(used_in_recipe) && {used_in_recipe: (Array.isArray(used_in_recipe)) ?  used_in_recipe.map(x => x.toLowerCase()) : new Array(used_in_recipe).map(x => x.toLowerCase())},
+      ...(requires) && {requires: (Array.isArray(requires)) ?  requires : new Array(requires)},
+      ...(used_in_recipe) && {used_in_recipe: (Array.isArray(used_in_recipe)) ?  used_in_recipe.map : new Array(used_in_recipe)},
     };
 
     if (!errors.isEmpty()) {
