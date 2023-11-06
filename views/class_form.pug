@@ -7,7 +7,7 @@ block content
     .form-group 
       label(for='class_name') Class:
       input#class_name.form-control(type='text' placeholder='Create a class that does not exist' name='class_name' value=(undefined===type ? '' : type.name))
-    button.btn.btn-primary(type='submit') Submit 
+    button.btn.btn-primary.mt-15(type='submit') Submit 
 
   if errors 
     div.mt-2
