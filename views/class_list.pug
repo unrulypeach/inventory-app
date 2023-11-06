@@ -6,4 +6,4 @@ block content
   ul
     each item in class_list 
       li 
-        a(href=`class/${item.toLowerCase()}`)= item
+        a(href=`class/${item.name}`)= item.capitalName

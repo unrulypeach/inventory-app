@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 const { mongoClient } = require('../utils/mongoUtil');
 const { ObjectId } = require('mongodb');
-const { capitalizeFirstLetter } = require('../utils/utils');
+const { whitespaceToUnderstore, underscoreToWhitespace } = require('../utils/utils');
 
 exports.index = asyncHandler(async (req, res, next) => {
   res.render('index', {title: 'Backpack Battles Inventory'});
@@ -15,11 +15,15 @@ exports.item_list = asyncHandler(async (req, res, next) => {
     const itemCollection = database.collection('item');
     const item_list = await itemCollection.find({}, { projection: { name: 1 } }).toArray();
 
+    item_list.forEach((el) => {
+      el.href = whitespaceToUnderstore(el.name);
+    })
+
     item_list.sort((a, b) => {
       return (a.name.toLowerCase() < b.name.toLowerCase()) ? -1 :
       (a.name.toLowerCase() > b.name.toLowerCase()) ? 1 : 0
     })
-    
+  
     res.render('item_list', {
       title: 'Item List',
       item_list
@@ -33,13 +37,14 @@ exports.item_list = asyncHandler(async (req, res, next) => {
 // Display detail page for a specific item.
 exports.item_detail = asyncHandler(async (req, res, next) => {
   try {
-    const id = new ObjectId(req.params.id);
+    const itemName = underscoreToWhitespace(req.params.id);
     const itemCollection = mongoClient.db('inventory_info').collection('item');
-    const item = await itemCollection.findOne({ _id: id });
+    const item = await itemCollection.findOne({ name: itemName });
 
     res.render('item_detail', {
-      title: `${item.name} - Item Detail`,
+      title: `${item?.name ?? itemName} - Item Detail`,
       item,
+      prevPg: req.header('Referer'),
     });
     return;
   } catch(err) {
@@ -58,7 +63,7 @@ exports.item_create_get = asyncHandler(async (req, res, next) => {
     rarityColl.find({}, { populate: { _id: 0 } }).toArray(),
     typeColl.find({}, { populate: { _id: 0 } }).toArray(),
     classColl.find({}, { populate: { _id: 0 } }).toArray(),
-    itemColl.find({}, { populate: { _id: 0, name: 1 } }).toArray(),
+    itemColl.find({}, { populate: { name: 1 } }).toArray(),
   ]);
 
   const sortedType = allType

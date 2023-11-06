@@ -8,11 +8,13 @@ exports.class_list = asyncHandler(async (req, res, next) => {
   try {
     const classColl = mongoClient.db('inventory_info').collection('class');
     const class_list = await classColl.find({}).toArray();
-    const capitalized_list = class_list.map((item) => capitalizeFirstLetter(item.name));
-    
+    // const capitalized_list = class_list.map((item) => capitalizeFirstLetter(item.name));
+    class_list.forEach((el) => {
+      el.capitalName = capitalizeFirstLetter(el.name);
+    })
     res.render('class_list', {
       title: 'Class List',
-      class_list: capitalized_list,
+      class_list,
     });
     return;
   } catch(err) {
@@ -25,7 +27,7 @@ exports.class_detail = asyncHandler(async (req, res, next) => {
   try{
     const className = req.params.id;
     const itemColl = mongoClient.db('inventory_info').collection('item');
-    const item_by_class = await itemColl.find({ class: className }, { projection: { name: 1 } }).toArray();
+    const item_by_class = await itemColl.find({ of_class: className }, { projection: { name: 1 } }).toArray();
 
     res.render('class_detail', {
       title: `${capitalizeFirstLetter(className)}`,
