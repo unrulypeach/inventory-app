@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 const { mongoClient } = require('../utils/mongoUtil');
-const { capitalizeFirstLetter, whitespaceToUnderstore } = require('../utils/utils');
+const { capitalizeFirstLetter, whitespaceToUnderscore } = require('../utils/utils');
 
 // Display list of all types.
 exports.type_list = asyncHandler(async (req, res, next) => {
@@ -32,7 +32,7 @@ exports.type_detail = asyncHandler(async (req, res, next) => {
     const items_by_type = await itemColl.find({ type: typeName }, { projection: { name: 1 } }).toArray();
 
     items_by_type.forEach((el) => {
-      el.href = whitespaceToUnderstore(el.name)
+      el.href = whitespaceToUnderscore(el.name)
     })
     res.render('type_detail', {
       title: `${capitalizeFirstLetter(typeName)} Items`,

@@ -6,7 +6,7 @@ exports.rmWhitespace = (str) => {
   return str.replace(/\s/g,"")
 }
 
-exports.whitespaceToUnderstore = (str) => {
+exports.whitespaceToUnderscore = (str) => {
   return str.replace(/\s/g,"_");
 }
 

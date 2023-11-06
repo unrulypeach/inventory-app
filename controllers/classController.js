@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 const { mongoClient } = require('../utils/mongoUtil');
-const { capitalizeFirstLetter } = require('../utils/utils');
+const { capitalizeFirstLetter, whitespaceToUnderscore } = require('../utils/utils');
 
 // Display list of all classs.
 exports.class_list = asyncHandler(async (req, res, next) => {
@@ -28,6 +28,10 @@ exports.class_detail = asyncHandler(async (req, res, next) => {
     const className = req.params.id;
     const itemColl = mongoClient.db('inventory_info').collection('item');
     const item_by_class = await itemColl.find({ of_class: className }, { projection: { name: 1 } }).toArray();
+
+    item_by_class.forEach((el) => {
+      el.href = whitespaceToUnderscore(el.name)
+    })
 
     res.render('class_detail', {
       title: `${capitalizeFirstLetter(className)}`,

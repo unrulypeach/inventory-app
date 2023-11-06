@@ -24,5 +24,7 @@ block content
         for thing in item.used_in_recipe
           a(href=`/catalog/item/${thing.replace(/\s/g,"_")}`) #{thing} | 
     -}
+
+    a(href='update/') Update item
   else 
     h1 #{title} does not exist.

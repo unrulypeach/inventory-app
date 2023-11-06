@@ -6,7 +6,7 @@ block content
   ul 
     each item in item_list 
       li 
-        a(href=`/catalog/item/${item._id}`)= item.name
+        a(href=`/catalog/item/${item.href}/`)= item.name
 
     else 
       li There are no #{title} class items

@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 const { mongoClient } = require('../utils/mongoUtil');
-const { capitalizeFirstLetter, whitespaceToUnderstore } = require('../utils/utils');
+const { capitalizeFirstLetter, whitespaceToUnderscore } = require('../utils/utils');
 
 exports.rarities_list = asyncHandler(async(req, res, next) => {
   try{
@@ -28,7 +28,7 @@ exports.rarities_detail = asyncHandler(async(req, res, next) => {
     const items_by_rarity = await itemColl.find({ rarity: rarityName }, { projection: { name: 1 } }).toArray();
 
     items_by_rarity.forEach((el) => {
-      el.href = whitespaceToUnderstore(el.name);
+      el.href = whitespaceToUnderscore(el.name);
     })
 
     res.render('rarities_detail', {

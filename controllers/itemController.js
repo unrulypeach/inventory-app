@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 const { mongoClient } = require('../utils/mongoUtil');
 const { ObjectId } = require('mongodb');
-const { whitespaceToUnderstore, underscoreToWhitespace } = require('../utils/utils');
+const { whitespaceToUnderscore, underscoreToWhitespace } = require('../utils/utils');
 
 exports.index = asyncHandler(async (req, res, next) => {
   res.render('index', {title: 'Backpack Battles Inventory'});
@@ -16,7 +16,7 @@ exports.item_list = asyncHandler(async (req, res, next) => {
     const item_list = await itemCollection.find({}, { projection: { name: 1 } }).toArray();
 
     item_list.forEach((el) => {
-      el.href = whitespaceToUnderstore(el.name);
+      el.href = whitespaceToUnderscore(el.name);
     })
 
     item_list.sort((a, b) => {
@@ -243,7 +243,18 @@ exports.item_delete_post = asyncHandler(async (req, res, next) => {
 
 // Display item update form on GET.
 exports.item_update_get = asyncHandler(async (req, res, next) => {
-  
+  const rarityColl = mongoClient.db('inventory_info').collection('rarity');
+  const typeColl = mongoClient.db('inventory_info').collection('type');
+  const classColl = mongoClient.db('inventory_info').collection('class');
+  const itemColl = mongoClient.db('inventory_info').collection('item');
+
+  res.render('item_form', {
+    title: 'Update item',
+    allRarity: rarityColl,
+    allType: typeColl, 
+    allClass: classColl, 
+    allItem: itemColl,
+  })
 });
 
 // Handle item update on POST.
