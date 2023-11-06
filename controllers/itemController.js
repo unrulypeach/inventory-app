@@ -66,13 +66,11 @@ exports.item_create_get = asyncHandler(async (req, res, next) => {
     itemColl.find({}, { populate: { name: 1 } }).toArray(),
   ]);
 
-  const sortedType = allType
-    .sort((a, b) => {
+  allType.sort((a, b) => {
       return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
       (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
     });
-
-  const sortedItems = allItem.sort((a, b) => {
+  allItem.sort((a, b) => {
     return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
     (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
   });
@@ -80,9 +78,9 @@ exports.item_create_get = asyncHandler(async (req, res, next) => {
   res.render('item_form', { 
     title: 'Create new item',
     allRarity,
-    allType: sortedType,
+    allType,
     allClass,
-    allItem: sortedItems,
+    allItem,
   });
 });
 
@@ -162,14 +160,12 @@ exports.item_create_post = [
         classColl.find({}, { populate: { _id: 0 } }).toArray(),
         itemColl.find({}, { populate: { _id: 0, name: 1 } }).toArray(),
       ]);
-    
-     
-      for (const rarity of allRarity) {
-        if (newItem.rarity.toLowerCase() === rarity.name.toLowerCase()) {
+        
+      allRarity.forEach((rarity) => {
+        if (newItem.rarity === rarity.name) {
           rarity.checked = 'true';
         }
-      };
-
+      });
       for (const prevType of type) {
         for (const aType of allType) {
           if (prevType.toLowerCase() === aType.name.toLowerCase()) {
@@ -177,7 +173,6 @@ exports.item_create_post = [
           }
         }
       };
-
       if (of_class) {
         for (const aClass of allClass) {
           if (newItem.of_class.toLowerCase() === aClass.name) {
@@ -185,7 +180,6 @@ exports.item_create_post = [
           }
         };
       };
-
       if (requires) {
         for (const prevReq of requires) {
           for (const item of allItem) {
@@ -195,7 +189,6 @@ exports.item_create_post = [
           }
         }
       };
-
       if (used_in_recipe) {
         for (const prevUsed of used_in_recipe) {
           for (const item of allItem) {
@@ -206,12 +199,11 @@ exports.item_create_post = [
         }
       };
 
-      const sortedType = allType
-        .sort((a, b) => {
+      allType.sort((a, b) => {
           return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
           (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
         });
-      const sortedItems = allItem.sort((a, b) => {
+      allItem.sort((a, b) => {
         return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
         (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
       });
@@ -219,15 +211,16 @@ exports.item_create_post = [
       res.render('item_form', { 
         title: 'Create new item',
         allRarity,
-        allType: sortedType,
+        allType,
         allClass,
-        allItem: sortedItems,
+        allItem,
         item: newItem,
         errors: errors.array(),
       });
     } else {
       const insertedItem = await itemColl.insertOne(newItem);
-      res.redirect(`/catalog/item/${insertedItem.insertedId}`);
+      const newItemUrl = whitespaceToUnderscore(newItem.name)
+      res.redirect(`/catalog/item/${newItemUrl}`);
     }
 })];
 
@@ -247,17 +240,204 @@ exports.item_update_get = asyncHandler(async (req, res, next) => {
   const typeColl = mongoClient.db('inventory_info').collection('type');
   const classColl = mongoClient.db('inventory_info').collection('class');
   const itemColl = mongoClient.db('inventory_info').collection('item');
+  const currItemName = underscoreToWhitespace(req.params.id)
+
+  const [allRarity, allType, allClass, allItem, currItem] = await Promise.all([
+    rarityColl.find({}, { populate: { _id: 0 } }).toArray(),
+    typeColl.find({}, { populate: { _id: 0 } }).toArray(),
+    classColl.find({}, { populate: { _id: 0 } }).toArray(),
+    itemColl.find({}, { populate: { name: 1 } }).toArray(),
+    itemColl.findOne({ name: currItemName }),
+  ]);
+
+  const { type, of_class, requires, used_in_recipe, } = currItem;
+
+  allRarity.forEach((rarity) => {
+    if (currItem.rarity === rarity.name) {
+      rarity.checked = 'true';
+    }
+  });
+  for (const prevType of type) {
+    for (const aType of allType) {
+      if (prevType.toLowerCase() === aType.name.toLowerCase()) {
+        aType.checked = 'true';
+      }
+    }
+  };
+  if (of_class) {
+    for (const aClass of allClass) {
+      if (currItem.of_class.toLowerCase() === aClass.name) {
+        aClass.checked = 'true';
+      }
+    };
+  };
+  if (requires) {
+    for (const prevReq of requires) {
+      for (const item of allItem) {
+        if (prevReq.toLowerCase() === item.name.toLowerCase()) {
+          item.prevRequires = 'true';
+        }
+      }
+    }
+  };
+  if (used_in_recipe) {
+    for (const prevUsed of used_in_recipe) {
+      for (const item of allItem) {
+        if (prevUsed.toLowerCase() === item.name.toLowerCase()) {
+          item.prevUsed = 'true';
+        }
+      }
+    }
+  };
+
+  allType.sort((a, b) => {
+      return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
+      (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
+    });
+  allItem.sort((a, b) => {
+    return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
+    (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
+  });
 
   res.render('item_form', {
-    title: 'Update item',
-    allRarity: rarityColl,
-    allType: typeColl, 
-    allClass: classColl, 
-    allItem: itemColl,
+    title: `Update ${currItemName}`,
+    allRarity,
+    allType, 
+    allClass, 
+    allItem,
+    item: currItem,
   })
 });
 
 // Handle item update on POST.
-exports.item_update_post = asyncHandler(async (req, res, next) => {
-  res.send("NOT IMPLEMENTED: Item update POST");
-});
+exports.item_update_post = [
+  body('name', 'name is required')
+    .trim()
+    .isString()
+    .notEmpty()
+    .escape(),
+  body('effect', 'effect is required')
+    .trim()
+    .isString()
+    .notEmpty()
+    .escape(),
+  body('rarity', 'rarity is required')
+    .trim()
+    .isString()
+    .notEmpty()
+    .escape(),
+  body('type', 'type is required')
+    .toArray()
+    .isArray()
+    .escape(),
+  body('cost', 'cost is required')
+    .trim()
+    .isNumeric()
+    .notEmpty()
+    .escape(),
+  body('class', 'class error')
+    .trim()
+    .optional()
+    .escape(),
+  body('requires', 'requires error')
+    .trim()
+    .optional()
+    .toArray()
+    .isArray()
+    .escape(),
+  body('used_in_recipe', 'used_in_recipes error')
+    .trim()
+    .optional()
+    .toArray()
+    .isArray()
+    .escape(),
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+    const updateItemName = req.params.id;
+    const { name, effect, rarity, type, cost, of_class, requires, used_in_recipe, } = req.body;
+    const rarityColl = mongoClient.db('inventory_info').collection('rarity');
+    const typeColl = mongoClient.db('inventory_info').collection('type');
+    const classColl = mongoClient.db('inventory_info').collection('class');
+    const itemColl = mongoClient.db('inventory_info').collection('item');
+    const newItem = {
+      name,
+      effect,
+      rarity: rarity.toLowerCase(),
+      type: type.map(x => x.toLowerCase()),
+      cost,
+      ...(of_class) && {of_class},
+      ...(requires) && {requires: (Array.isArray(requires)) ?  requires : new Array(requires)},
+      ...(used_in_recipe) && {used_in_recipe: (Array.isArray(used_in_recipe)) ?  used_in_recipe.map : new Array(used_in_recipe)},
+    };
+
+    if (!errors.isEmpty()) {
+      const [allRarity, allType, allClass, allItem] = await Promise.all([
+        rarityColl.find({}, { populate: { _id: 0 } }).toArray(),
+        typeColl.find({}, { populate: { _id: 0 } }).toArray(),
+        classColl.find({}, { populate: { _id: 0 } }).toArray(),
+        itemColl.find({}, { populate: { _id: 0, name: 1 } }).toArray(),
+      ]);
+
+      allRarity.forEach((rarity) => {
+        if (newItem.rarity === rarity.name) {
+          rarity.checked = 'true';
+        }
+      });
+      for (const prevType of type) {
+        for (const aType of allType) {
+          if (prevType.toLowerCase() === aType.name.toLowerCase()) {
+            aType.checked = 'true';
+          }
+        }
+      };
+      if (of_class) {
+        for (const aClass of allClass) {
+          if (newItem.of_class.toLowerCase() === aClass.name) {
+            aClass.checked = 'true';
+          }
+        };
+      };
+      if (requires) {
+        for (const prevReq of requires) {
+          for (const item of allItem) {
+            if (prevReq.toLowerCase() === item.name.toLowerCase()) {
+              item.prevRequires = 'true';
+            }
+          }
+        }
+      };
+      if (used_in_recipe) {
+        for (const prevUsed of used_in_recipe) {
+          for (const item of allItem) {
+            if (prevUsed.toLowerCase() === item.name.toLowerCase()) {
+              item.prevUsed = 'true';
+            }
+          }
+        }
+      };
+
+      allType.sort((a, b) => {
+          return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
+          (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
+        });
+      allItem.sort((a, b) => {
+        return (a.name.toUpperCase() < b.name.toUpperCase()) ? -1 :
+        (a.name.toUpperCase() > b.name.toUpperCase()) ? 1 : 0;
+      });
+
+      res.render('item_form', { 
+        title: `Update ${updateItemName}`,
+        allRarity,
+        allType,
+        allClass,
+        allItem,
+        item: newItem,
+        errors: errors.array(),
+      });
+    } else {
+      await itemColl.updateOne({ name: updateItemName }, { $set: newItem });
+      const updatedItemUrl = whitespaceToUnderscore(newItem.name);
+      res.redirect(`/catalog/item/${updatedItemUrl}/`)
+    }
+  }),  
+];
