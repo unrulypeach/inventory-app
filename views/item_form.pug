@@ -28,45 +28,54 @@ block content
               select#type.form-control.selectpicker.border.border-secondary-subtle(name='type' data-live-search='true' data-actions-box="true" placeholder='Select Type(s)' multiple required)
                 for aType in allType 
                   option(value=aType.name selected=(aType.checked ? true : false)) #{aType.name.charAt(0).toUpperCase() + aType.name.slice(1)}
-
-      div(class="accordion-item")
-        h2(class="accordion-header")
-          button(class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo") Weapon details
-
-        div(id="collapseTwo" class="accordion-collapse collapse show" data-bs-parent="#accordionExample")
-          div(class="accordion-body")
             .form-group 
               label(for='cost') Cost:
               input#cost.form-control.border(type='number' name='cost' min=0 value=(undefined===item ? '' : item.cost) required)
 
+      div(class="accordion-item")
+        h2(class="accordion-header")
+          button(class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo") Sockets
+
+        div(id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#accordionExample")
+          div(class="accordion-body")
+            .form-group 
+              label(for='sockets') Sockets:
+              input#sockets.form-control.border(type='number' name='sockets' min=0 value=(undefined===item ? '' : item.sockets))
+              
+      div(class="accordion-item")
+        h2(class="accordion-header")
+          button(class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree") Weapon details
+
+        div(id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#accordionExample")
+          div(class="accordion-body")
             .form-group 
               label(for='accuracy') Accuracy:
               .input-group
-                input#accuracy.form-control.border(type='number' name='accuracy' min=0 value=(undefined===item ? '' : item.accuracy) required)
+                input#accuracy.form-control.border(type='number' name='accuracy' min=0 value=(undefined===item ? '' : item.accuracy))
                 span#end-input-text.input-group-text %
 
             .form-group
               label.form-label(for='damage') Damage:
               .input-group
-                input#min-damage.form-control(type='number' placeholder='min' name='min-damage' min=0 max=50 value=(undefined===item ? '' : item.min_damage) required)
+                input#min-damage.form-control(type='number' placeholder='min' name='min-damage' min=0 max=50 value=(undefined===item ? '' : item.min_damage))
                 span#middle-input-text.input-group-text -
-                input#max-damage.form-control(type='number' placeholder='max' name='max-damage' min=0 max=50 value=(undefined===item ? '' : item.max_damage) required)
+                input#max-damage.form-control(type='number' placeholder='max' name='max-damage' min=0 max=50 value=(undefined===item ? '' : item.max_damage))
             
             .form-group 
               label(for='cooldown') Cooldown:
               .input-group
-                input#cooldown.form-control.border(type='number' name='cooldown' min=0 value=(undefined===item ? '' : item.cooldown) required)
+                input#cooldown.form-control.border(type='number' name='cooldown' min=0 value=(undefined===item ? '' : item.cooldown))
                 span#end-input-text.input-group-text sec
 
             .form-group 
               label(for='stamina') Stamina cost:
-              input#stamina.form-control.border(type='number' name='stamina' min=0 value=(undefined===item ? '' : item.stamina) required)
+              input#stamina.form-control.border(type='number' name='stamina' min=0 value=(undefined===item ? '' : item.stamina))
 
       div(class="accordion-item")
         h2(class="accordion-header")
-          button(class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree") Class and Recipes
+          button(class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFour" aria-expanded="true" aria-controls="collapseFour") Class and Recipes
 
-        div(id="collapseThree" class="accordion-collapse collapse show" data-bs-parent="#accordionExample")
+        div(id="collapseFour" class="accordion-collapse collapse" data-bs-parent="#accordionExample")
           div(class="accordion-body")
             .form-group 
               label(for='of_class') Class: 
@@ -85,7 +94,7 @@ block content
                 for item in allItem 
                   option(value=item.name selected=(item.prevUsed ? true : false)) #{item.name}
     
-    button.btn.btn-primary.mt-15(type='submit') Submit 
+      button.btn.btn-primary.mt-15(type='submit' onClick=removeClassNameFromDoc) Submit 
 
   if errors 
     div.mt-2

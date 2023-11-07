@@ -13,3 +13,10 @@ exports.whitespaceToUnderscore = (str) => {
 exports.underscoreToWhitespace = (str) => {
   return str.replace(/_/g, " ");
 }
+
+exports.removeClassnameFromDoc = (str) => {
+  const elements = document.getElementsByClassName('collapse');
+  elements.forEach((el) => {
+    el.classList.remove(str);
+  });
+}
