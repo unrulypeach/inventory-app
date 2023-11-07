@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const { body, validationResult } = require('express-validator');
 const { mongoClient } = require('../utils/mongoUtil');
 const { ObjectId } = require('mongodb');
-const { whitespaceToUnderscore, underscoreToWhitespace } = require('../utils/utils');
+const { whitespaceToUnderscore, underscoreToWhitespace, removeClassnameFromDoc } = require('../utils/utils');
 
 exports.index = asyncHandler(async (req, res, next) => {
   res.render('index', {title: 'Backpack Battles Inventory'});
@@ -81,6 +81,7 @@ exports.item_create_get = asyncHandler(async (req, res, next) => {
     allType,
     allClass,
     allItem,
+    removeClassnameFromDoc,
   });
 });
 
@@ -119,9 +120,107 @@ exports.item_create_post = [
     .isNumeric()
     .notEmpty()
     .escape(),
+  body('sockets', 'sockets required to be greater than 0 when weapon, armor, shield, helmet or shoes type selected')
+    .trim()
+    .custom((value, {req}) => {
+      const type = req.body.type;
+      const options = ['weapon', 'armor', 'shield', 'helmet', 'shoes'];
+      const result = type.some(el => options.includes(el));
+      // requires value
+      if (result) {
+        return (!value) 
+          ? false 
+          : (value > 0) ? true : false // check if greater than 1
+      } else {
+        return (!value) ? true : false
+      }
+    })
+    .escape(),
+  body('accuracy', 'accuracy required to be greater than 0 when weapon type selected')
+    .trim()
+    // if type includes weapon
+    .custom((value, {req}) => {
+      const type = req.body.type;
+      const result = type.includes('weapon')
+      // requires value
+      if (result) {
+        return (!value) 
+          ? false 
+          : (value > 0) ? true : false // check if greater than 1
+      } else {
+        return (!value) ? true : false
+      }
+    })
+    .escape(),
+  body('min-damage', 'min-damage required to be greater than 0 when weapon type selected')
+    .trim()
+    // if type includes weapon
+    .custom((value, {req}) => {
+      const type = req.body.type;
+      const result = type.includes('weapon')
+      // requires value
+      if (result) {
+        return (!value) 
+          ? false 
+          : (value > 0) ? true : false // check if greater than 1
+      } else {
+        return (!value) ? true : false
+      }
+    })
+    .escape(),
+  body('max-damage', 'max-damage required to be greater than 0 when weapon type selected')
+    .trim()
+    // if type includes weapon
+    .custom((value, {req}) => {
+      const type = req.body.type;
+      const result = type.includes('weapon')
+      // requires value
+      if (result) {
+        return (!value) 
+          ? false 
+          : (value > 0) ? true : false // check if greater than 1
+      } else {
+        return (!value) ? true : false
+      }
+    })
+    .escape(),
+  body('cooldown', 'cooldown required to be greater than 0 when weapon type selected')
+    .trim()
+    // if type includes weapon
+    .custom((value, {req}) => {
+      const type = req.body.type;
+      const result = type.includes('weapon')
+      // requires value
+      if (result) {
+        return (!value) 
+          ? false 
+          : (value > 0) ? true : false // check if greater than 1
+      } else {
+        return (!value) ? true : false
+      }
+    })
+    .escape(),
+  body('stamina', 'stamina required to be greater than 0 when weapon type selected')
+    .trim()
+    // if type includes weapon
+    .custom((value, {req}) => {
+      const type = req.body.type;
+      const result = type.includes('weapon')
+      // requires value
+      if (result) {
+        return (!value) 
+          ? false 
+          : (value > 0) ? true : false // check if greater than 1
+      } else {
+        return (!value) ? true : false
+      }
+    })
+    .escape(),
   body('class', 'class error')
     .trim()
-    .optional()
+    .optional({ values: 'falsy' })
+    .isAlpha()
+    .withMessage('class must use letters only')
     .escape(),
   body('requires', 'requires error')
     .trim()
@@ -141,13 +240,18 @@ exports.item_create_post = [
     const typeColl = mongoClient.db('inventory_info').collection('type');
     const classColl = mongoClient.db('inventory_info').collection('class');
     const itemColl = mongoClient.db('inventory_info').collection('item');
-    const { name, effect, rarity, type, cost, of_class, requires, used_in_recipe, } = req.body;
+    const { name, effect, rarity, type, cost, sockets, accuracy, damage, cooldown, stamina, of_class, requires, used_in_recipe, } = req.body;
     const newItem = {
       name,
       effect,
       rarity: rarity.toLowerCase(),
       type: type.map(x => x.toLowerCase()),
       cost,
+      ...(sockets) && {sockets},
+      ...(accuracy) && {accuracy},
+      ...(damage) && {damage},
+      ...(cooldown) && {cooldown},
+      ...(stamina) && {stamina},
       ...(of_class) && {of_class},
       ...(requires) && {requires: (Array.isArray(requires)) ?  requires : new Array(requires)},
       ...(used_in_recipe) && {used_in_recipe: (Array.isArray(used_in_recipe)) ?  used_in_recipe.map : new Array(used_in_recipe)},
@@ -215,6 +319,7 @@ exports.item_create_post = [
         allClass,
         allItem,
         item: newItem,
+        removeClassnameFromDoc,
         errors: errors.array(),
       });
     } else {
@@ -306,6 +411,7 @@ exports.item_update_get = asyncHandler(async (req, res, next) => {
     allClass, 
     allItem,
     item: currItem,
+    removeClassnameFromDoc,
   })
 });
 
@@ -334,6 +440,36 @@ exports.item_update_post = [
     .trim()
     .isNumeric()
     .notEmpty()
+    .escape(),
+  body('accuracy')
+    .trim()
+    .optional({ values: 'falsy' })
+    .isNumeric()
+    .withMessage('accuracy must be a number')
+    .escape(),
+  body('min-damage')
+    .trim()
+    .optional({ values: 'falsy' })
+    .isNumeric()
+    .withMessage('min-dmg must be a number')
+    .escape(),
+  body('max-damage')
+    .trim()
+    .optional({ values: 'falsy' })
+    .isNumeric()
+    .withMessage('max-dmg must be a number')
+    .escape(),
+  body('cooldown')
+    .trim()
+    .optional({ values: 'falsy' })
+    .isNumeric()
+    .withMessage('cooldown must be a number')
+    .escape(),
+  body('stamina')
+    .trim()
+    .optional({ values: 'falsy' })
+    .isNumeric()
+    .withMessage('stamina must be a number')
     .escape(),
   body('class', 'class error')
     .trim()
@@ -432,6 +568,7 @@ exports.item_update_post = [
         allClass,
         allItem,
         item: newItem,
+        removeClassnameFromDoc,
         errors: errors.array(),
       });
     } else {
